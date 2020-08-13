@@ -1,0 +1,25 @@
+ENV=TEST
+
+if [ "${ENV}" = "TEST" ]
+then
+    CONFIG=config/app_test.conf
+    LOCAL_JAR=/target/scala-2.11/anonymize-assembly-1.0.jar
+    HDFS_PATH=/user/anonymous
+    FILE_PATH=/test/data
+    LOG_PATH=/logs
+    VERSION=0.0.1
+    BEELINE_CONNECTION_STRING="jdbc:hive2://localhost:10000/default"
+    DB_RAW=db_raw
+    DB_WORK=db_work
+    DB_SERVICE=db_service
+else
+    CONFIG=config/app-homol.conf
+    HDFS_PATH=/user/anonymous
+    FILE_PATH=/test/data
+    LOG_PATH=/logs
+    VERSION=0.0.1
+    BEELINE_CONNECTION_STRING="jdbc:hive2://localhost:10000/default"
+    DB_RAW=db_raw
+    DB_WORK=db_work
+    DB_SERVICE=db_service
+fi

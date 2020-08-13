@@ -9,6 +9,5 @@
 
 ## Include in sbt
 ```sh
-    anonymize-assembly-1.0.jar
-    libraryDependencies += "xpi-stream" %% "anonymize" % "0.0.1" % "provided"
+    libraryDependencies += "xpi-tokenization" %% "anonymize" % "0.0.1" % "provided"
 ```
