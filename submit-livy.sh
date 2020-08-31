@@ -1,19 +1,22 @@
 #!/bin/bash
 
+ACCOUNT="datalakexpidevbrz"
+#ACCOUNT="datalakexpiprodbrz"
+
 az login \
     --service-principal \
-    --username  ${STORAGE_USER} \
+    --username ${STORAGE_USER} \
     --password ${STORAGE_PASSWORD} \
     --tenant ${STORAGE_TENANT}
 
 az dls fs upload \
-    --account datalakexpidevbrz \
+    --account $ACCOUNT \
     --source-path $SOURCE_PATH \
     --destination-path $DLS_DESTINATION_PATH \
     --overwrite
+# az dls fs delete --account $ACCOUNT --path "/file_source/jars"
+#az dls fs list --account $ACCOUNT --path "/file_source/jars"
 
-# az dls fs delete --account datalakexpidevbrz --path "/file_source/jars"
-# az dls fs list   --account datalakexpidevbrz --path "/file_source/jars"
 
 JOB_NAME="SPARK"_`date +\%Y\%m\%d\%H\%M\%S`
 curl -s -k -H 'Content-Type: application/json' -X POST \
@@ -38,4 +41,4 @@ curl -s -k -H 'Content-Type: application/json' -X POST \
                 "spark.delta.logStore.class":"org.apache.spark.sql.delta.storage.AzureLogStore",
                 "spark.kubernetes.container.image":"bigdataxpdev.azurecr.io/xp-spark-kubernetes:v2.4.5"
             }
-          }' "http://localhost:8998/batches" | jq
+          }' "http://localhost:8999/batches" | jq

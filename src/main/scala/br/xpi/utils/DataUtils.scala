@@ -1,4 +1,4 @@
-package br.com.anonymize.utils
+package br.xpi.utils
 
 import java.util.Date
 import java.text.SimpleDateFormat

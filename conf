@@ -1,5 +1,22 @@
 ENV=TEST
 
+
+#LOCAL_JAR="adl://datalakexpiprodbrz.azuredatalakestore.net/file_source/jars/anonymize-assembly-1.0.jar"
+LOCAL_JAR="adl://datalakexpidevbrz.azuredatalakestore.net/file_source/jars/anonymize-assembly-1.0.jar"
+CLASS="br.com.anonymize.Execute"
+CONFIG="adl://datalakexpiprodbrz.azuredatalakestore.net/file_source/jars/app_test.conf"
+
+#storage
+STORAGE_USER="c1aaaad8-d683-4425-91cf-adf885f58c47"
+STORAGE_PASSWORD="VB5QD?/s*B=SfuVYVgYnBkLCPnFHK039"
+STORAGE_TENANT="cf56e405-d2b0-4266-b210-aa04636b6161"
+
+#path
+# SOURCE_PATH="/mnt/f/projects/scala/anonymize-spark/target/scala-2.11/anonymize-assembly-1.0.jar"
+SOURCE_PATH="/mnt/f/xpi-engineer/EngDadosInfraSparkToken/target/scala-2.11/anonymize-assembly-1.0.jar"
+DLS_DESTINATION_PATH="/file_source/jars/anonymize-assembly-1.0.jar"
+
+
 if [ "${ENV}" = "TEST" ]
 then
     CONFIG=config/app_test.conf
@@ -23,3 +40,5 @@ else
     DB_WORK=db_work
     DB_SERVICE=db_service
 fi
+
+

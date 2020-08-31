@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+option java_package = "br.xpi.model";
+
+
+// Description of a token record.
+message TokenRecord {
+    string collumn = 1;
+    string hash = 2;
+    string value = 3;
+    // Data type for this record
+    string dataType = 4;
+}
