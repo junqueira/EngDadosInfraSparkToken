@@ -9,12 +9,14 @@ import java.util.Properties
 
 import org.apache.curator.test.TestingServer
 import org.slf4j.LoggerFactory
+
+import kafka.server.{KafkaConfig, KafkaServerStartable}
+
 import scala.collection.JavaConverters._
 import java.util.Comparator
-import kafka.admin.{AdminUtils, RackAwareMode}
-import kafka.server.{KafkaConfig, KafkaServerStartable}
-import kafka.utils.ZkUtils
 
+import kafka.admin.{AdminUtils, RackAwareMode}
+import kafka.utils.ZkUtils
 
 /**
  * Helper class for working with a local, embedded instance of Kafka.
@@ -71,9 +73,6 @@ case class KafkaLocalServer private (kafkaProperties: Properties, zooKeeperServe
      */
     def createTopic(topic: String, partitions: Int, replication: Int, topicConfig: Properties): Unit = {
         // TODO: There is a deprecation warning for AdminUtils. What should be used instead?
-        // :method createTopic in object AdminUtils is deprecated (since 1.1.0):
-        // This method is deprecated and will be replaced by kafka.zk.AdminZkClient.
-        // AdminUtils.createTopic(zkUtils, topic, partitions, replication, topicConfig, RackAwareMode.Enforced)
         AdminUtils.createTopic(zkUtils, topic, partitions, replication, topicConfig, RackAwareMode.Enforced)
     }
 }
@@ -88,7 +87,7 @@ object KafkaLocalServer {
     final val baseDir = "tmp/"
 
     final val KafkaDataFolderName = "kafka_data"
-
+    
     val Log = LoggerFactory.getLogger(classOf[KafkaLocalServer])
 
     def apply(cleanOnStart: Boolean): KafkaLocalServer = apply(DefaultPort, ZooKeeperLocalServer.DefaultPort, cleanOnStart)

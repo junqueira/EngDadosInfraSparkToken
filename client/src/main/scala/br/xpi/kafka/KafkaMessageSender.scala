@@ -18,7 +18,7 @@ object MessageSender {
     private val RETRYCOUNT = "1" // Number of retries on put
     private val BATCHSIZE = "1024" // Buffers for unsent records for each partition - controlls batching
     private val LINGERTIME = "1" // Timeout for more records to arive - controlls batching
-    private val BUFFERMEMORY = "1024000" // Controls the total amount of memory available to the producer for buffering. If records are sent faster than they can be transmitted to the server then this buffer space will be exhausted. When the buffer space is exhausted additional send calls will block. The threshold for time to block is determined by max.block.ms after which it throws a TimeoutException.
+    private val BUFFERMEMORY = "1024000" // Controls the total amount of memory available to the producer for buffering.
 
     def providerProperties(brokers: String, keySerializer: String, valueSerializer: String): Properties = {
         val props = new Properties

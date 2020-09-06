@@ -19,17 +19,3 @@ message WineRecord {
     // Data type for this record
     string dataType = 12;
 }
-
-//sample-test
-//7.4;
-//0.66;
-//0;
-//1.8;
-//0.075;
-//13;
-//40;
-//0.9978;
-//3.51;
-//0.56;
-//9.4;
-//5

@@ -2,30 +2,25 @@ package br.xpi.kafka.client
 
 import java.io.{ByteArrayOutputStream, File}
 import java.nio.file.{Files, Paths}
+import com.google.protobuf.ByteString
 import scala.concurrent.Future
 import scala.io.Source
-import com.google.protobuf.ByteString
 import scala.concurrent.ExecutionContext.Implicits.global
 
-import br.xpi.configuration. kafka.ApplicationKafkaParameters._
-import br.xpi.kafka.{KafkaLocalServer, MessageSender}
+import br.xpi.configuration.kafka.ApplicationKafkaParameters._
 import br.xpi.model.modeldescriptor.ModelDescriptor
 import br.xpi.model.winerecord.WineRecord
+import br.xpi.kafka.{KafkaLocalServer, MessageSender}
 import br.xpi.model.tokenrecord.TokenRecord
 
 
-/**
- * Application that publishes models and data records from the `data` directory to the appropriate Kafka topics.
- * Embedded Kafka is used and this class also instantiates the Kafka topics at start up.
- */
 object DataProvider {
 
     val file = "test/data/winequality_red.csv"
-    var dataTimeInterval = 100 * 1 // 1 sec
+    var dataTimeInterval = 1000 * 1 // 1 sec
     val directory = "test/data/"
     val tensorfile = "test/data/optimized_WineQuality.pb"
-     var modelTimeInterval = 1000 * 60 * 1 // 5 mins
-//    var modelTimeInterval = 10 * 60 * 1 // 5 mins
+    var modelTimeInterval = 1000 * 60 * 1 // 5 mins
 
     def main(args: Array[String]) {
 
@@ -34,29 +29,26 @@ object DataProvider {
         println(s"Model Message delay $modelTimeInterval")
 
         val kafka = KafkaLocalServer(true)
+        println(s"Cluster created...")
         kafka.start()
         kafka.createTopic(DATA_TOPIC)
         kafka.createTopic(MODELS_TOPIC)
-
-        println(s"Cluster created")
 
         publishData()
         publishModels()
 
         while(true)
-//            pause(600000)
-            pause(600)
+            pause(600000)
     }
 
-    def publishData() : Future[Unit] = Future {
+    def publishData() :  Future[Unit] = Future {
         val sender = MessageSender(KAFKA_BROKER)
         val bos = new ByteArrayOutputStream()
-
-//         val file = "test/data/winequality_red.csv"
-         val records = getListOfDataRecords(file)
-
-//        val file = "test/data/data_privacy.txt"
+//        val file = "test/data/data_test.txt"
 //        val records = getListOfDataRecordsToken(file)
+        val file = "test/data/winequality_red.csv"
+        val records = getListOfDataRecords(file)
+        println(s"printed file test $records ")
 
         var nrec = 0
         while (true) {
@@ -66,9 +58,49 @@ object DataProvider {
                 sender.writeValue(DATA_TOPIC, bos.toByteArray)
                 nrec = nrec + 1
                 if (nrec % 10 == 0)
-                    println(s"send tokenization $nrec records")
+                    println(s"printed $nrec records")
                 pause(dataTimeInterval)
             })
+        }
+    }
+
+    def publishModels() : Future[Unit] = Future {
+        val sender = MessageSender(KAFKA_BROKER)
+        val files = getListOfModelFiles(directory)
+        val bos = new ByteArrayOutputStream()
+        while (true) {
+            files.foreach(f => {
+                // PMML
+                val pByteArray = Files.readAllBytes(Paths.get(directory + f))
+                val pRecord = ModelDescriptor(
+                    name = f.dropRight(5),
+                    description = "generated tokenization", modeltype = ModelDescriptor.ModelType.PMML,
+                    dataType = "wine"
+                ).withData(ByteString.copyFrom(pByteArray))
+                bos.reset()
+                pRecord.writeTo(bos)
+                sender.writeValue(MODELS_TOPIC, bos.toByteArray)
+                println(s"Published _bulk ${pRecord.description}")
+                pause(modelTimeInterval)
+            })
+            // TF
+            val tByteArray = Files.readAllBytes(Paths.get(tensorfile))
+            val tRecord = ModelDescriptor(name = tensorfile.dropRight(3),
+                description = "generated from TensorFlow", modeltype = ModelDescriptor.ModelType.TENSORFLOW,
+                dataType = "wine").withData(ByteString.copyFrom(tByteArray))
+            bos.reset()
+            tRecord.writeTo(bos)
+            sender.writeValue(MODELS_TOPIC, bos.toByteArray)
+            println(s"Published _bulk ${tRecord.description}")
+            pause(modelTimeInterval)
+        }
+    }
+
+    private def pause(timeInterval : Long): Unit = {
+        try {
+            Thread.sleep(timeInterval)
+        } catch {
+            case _: Throwable => // Ignore
         }
     }
 
@@ -78,11 +110,12 @@ object DataProvider {
         for (line <- bufferedSource.getLines) {
             val cols = line.split(",").map(_.trim)
             val record = new TokenRecord(
-                collumn = cols(0).toString,
-                hash = cols(1).toString,
-                value = cols(2).toString,
-                dataType = "token"
+                collum = cols(0),
+                hash = cols(1),
+                value = cols(2)
+//                dataType = "token"
             )
+            println(s"printed $record ")
             result = record +: result
         }
         bufferedSource.close
@@ -93,7 +126,7 @@ object DataProvider {
         var result = Seq.empty[WineRecord]
         val bufferedSource = Source.fromFile(file)
         for (line <- bufferedSource.getLines) {
-            val cols = line.split(",").map(_.trim)
+            val cols = line.split(";").map(_.trim)
             val record = new WineRecord(
                 fixedAcidity = cols(0).toDouble,
                 volatileAcidity = cols(1).toDouble,
@@ -112,46 +145,6 @@ object DataProvider {
         }
         bufferedSource.close
         result
-    }
-
-    def publishModels() : Future[Unit] = Future {
-        val sender = MessageSender(KAFKA_BROKER)
-        val files = getListOfModelFiles(directory)
-        val bos = new ByteArrayOutputStream()
-        while (true) {
-            files.foreach(f => {
-                // PMML
-                val pByteArray = Files.readAllBytes(Paths.get(directory + f))
-                val pRecord = ModelDescriptor(
-                    name = f.dropRight(5),
-                    description = "generated from tokenization", modeltype = ModelDescriptor.ModelType.PMML,
-                    dataType = "wine"
-                ).withData(ByteString.copyFrom(pByteArray))
-                bos.reset()
-                pRecord.writeTo(bos)
-                sender.writeValue(MODELS_TOPIC, bos.toByteArray)
-                println(s"Published Model ${pRecord.description}")
-                pause(modelTimeInterval)
-            })
-            // TF
-            val tByteArray = Files.readAllBytes(Paths.get(tensorfile))
-            val tRecord = ModelDescriptor(name = tensorfile.dropRight(3),
-                description = "generated from TensorFlow", modeltype = ModelDescriptor.ModelType.TENSORFLOW,
-                dataType = "wine").withData(ByteString.copyFrom(tByteArray))
-            bos.reset()
-            tRecord.writeTo(bos)
-            sender.writeValue(MODELS_TOPIC, bos.toByteArray)
-            println(s"Published Model ${tRecord.description}")
-            pause(modelTimeInterval)
-        }
-    }
-
-    private def pause(timeInterval : Long): Unit = {
-        try {
-            Thread.sleep(timeInterval)
-        } catch {
-            case _: Throwable => // Ignore
-        }
     }
 
     private def getListOfModelFiles(dir: String): Seq[String] = {

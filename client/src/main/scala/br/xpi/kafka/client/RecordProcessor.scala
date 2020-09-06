@@ -1,8 +1,7 @@
 package br.xpi.kafka.client
 
-import org.apache.kafka.clients.consumer.ConsumerRecord
-
 import br.xpi.kafka.RecordProcessorTrait
+import org.apache.kafka.clients.consumer.ConsumerRecord
 
 
 /**
@@ -12,6 +11,8 @@ import br.xpi.kafka.RecordProcessorTrait
 class RecordProcessor extends RecordProcessorTrait[Array[Byte], Array[Byte]] {
     override def processRecord(record: ConsumerRecord[Array[Byte], Array[Byte]]): Unit = {
         RecordProcessor.count += 1
+
+        println(s" test processRecord")
         val key = record.key()
         val value = record.value()
         println(s"Retrieved message #${RecordProcessor.count}: " +
@@ -19,8 +20,12 @@ class RecordProcessor extends RecordProcessorTrait[Array[Byte], Array[Byte]] {
     }
 
     private def mkString(label: String, array: Array[Byte]) = {
-        if (array == null) s"${label} = ${array}"
-        else s"${label} = ${array}, size = ${array.size}, first 5 elements = ${array.take(5).mkString("[", ",", "]")}"
+        println(s" test array byts 2")
+        if (array == null)
+            s"${label} = ${array}"
+        else
+            s"${label} = ${array}, size = ${array.size}, first 5 elements = ${array.take(5).mkString("[", ",", "]")}"
+//            s"${label} = ${array}, test = ${array.size}"
     }
 }
 

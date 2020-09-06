@@ -8,7 +8,6 @@ object Versions {
     val akkaHttpVersion = "10.1.4"
     val akkaHttpJsonVersion = "1.21.0"
 
-
     val Curator        = "4.0.1"
 
     val kafkaVersion = "1.1.0"

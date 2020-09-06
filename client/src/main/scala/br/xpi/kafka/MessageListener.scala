@@ -11,8 +11,7 @@ import scala.collection.JavaConverters._
  */
 object MessageListener {
     private val AUTOCOMMITINTERVAL = "1000" // Frequency off offset commits
-    // private val SESSIONTIMEOUT = "30000"    // The timeout used to detect failures - should be greater then processing time
-    private val SESSIONTIMEOUT = "30000"
+    private val SESSIONTIMEOUT = "30000"    // The timeout used to detect failures - should be greater then processing time
     private val MAXPOLLRECORDS = "10"       // Max number of records consumed in a single poll
 
     def consumerProperties(brokers: String, group: String, keyDeserealizer: String, valueDeserealizer: String): Map[String, Object] = {

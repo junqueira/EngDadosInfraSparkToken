@@ -13,8 +13,8 @@ public class ApplicationKafkaParameters {
     public static final String STORE_NAME = "ModelStore";
     public static final int STORE_ID = 42;
 
-
-    public static final String DATA_TOPIC = "mdata2";
+    public static final String DATA_TOPIC = "mdata";
+//    public static final String DATA_TOPIC = "xpi";
     public static final String MODELS_TOPIC = "models";
 
     public static final String DATA_GROUP = "wineRecordsGroup";
